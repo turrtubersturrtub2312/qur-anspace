@@ -39,34 +39,32 @@
   </div>
 
   <!-- MODAL EVENT INFO -->
-  <!-- MODAL EVENT INFO -->
-<div id="eventModal" class="modal">
-  <div class="modal-content">
-    <span class="close-btn" id="closeModal">×</span>
-    <h2>📢 Event &amp; Informasi</h2>
-    
-    <div id="eventListContainer" class="event-list-container"></div>
+  <div id="eventModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" id="closeModal">×</span>
+      <h2>📢 Event &amp; Informasi</h2>
+      
+      <div id="eventListContainer" class="event-list-container"></div>
 
-    <!-- Tombol Login Owner Dipasang Langsung -->
-    <div style="text-align: center; margin-top: 20px;">
-      <button id="btnAdminAccess" class="btn-admin-secret">🔑 Login Owner</button>
+      <div style="text-align: center; margin-top: 20px;">
+        <button id="btnAdminAccess" class="btn-admin-secret">🔑 Login Owner</button>
+      </div>
     </div>
   </div>
-</div>
 
-  <!-- MODAL ADMIN -->
+  <!-- MODAL PANEL OWNER -->
   <div id="adminModal" class="modal">
     <div class="modal-content">
       <span class="close-btn" id="closeAdminModal">×</span>
       <h2>🔒 Panel Pemilik Website</h2>
-      <div class="event-form">
+      <form id="eventForm">
         <h3>Tambah Event Baru</h3>
-        <input type="text" id="eventTitle" placeholder="Judul Event / Info">
-        <input type="datetime-local" id="eventTime">
+        <input type="text" id="eventTitle" placeholder="Judul Event / Info" required="">
+        <input type="datetime-local" id="eventTime" required="">
         <input type="text" id="eventImage" placeholder="URL Gambar (Opsional)">
         <textarea id="eventDesc" rows="3" placeholder="Deskripsi atau detail info..."></textarea>
-        <button id="btnSaveEvent" class="btn-save">Simpan Event</button>
-      </div>
+        <button type="submit" id="btnSaveEvent" class="btn-save">Simpan Event</button>
+      </form>
     </div>
   </div>
 

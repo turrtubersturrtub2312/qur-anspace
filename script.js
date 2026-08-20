@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Element Selectors
+  // Selectors
   const surahSelect = document.getElementById('surahSelect');
   const quranContainer = document.getElementById('quranContainer');
   const searchInput = document.getElementById('searchInput');
@@ -8,19 +8,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const bookmarkInfo = document.getElementById('bookmarkInfo');
   const btnGoBookmark = document.getElementById('btnGoBookmark');
 
-  // Modal Event Info Elements
   const btnEventInfo = document.getElementById('btnEventInfo');
   const eventModal = document.getElementById('eventModal');
   const closeModal = document.getElementById('closeModal');
   const eventListContainer = document.getElementById('eventListContainer');
 
-  // Modal Admin Elements
   const btnAdminAccess = document.getElementById('btnAdminAccess');
   const adminModal = document.getElementById('adminModal');
   const closeAdminModal = document.getElementById('closeAdminModal');
-  const btnSaveEvent = document.getElementById('btnSaveEvent');
+  const eventForm = document.getElementById('eventForm');
 
-  // Kata Sandi Pemilik
+  // Password Owner
   const OWNER_PASSWORD = "sammy8";
 
   // 1. Ambil Daftar Surah
@@ -42,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 2. Load Ayat Surah
+  // 2. Load Ayat Surah + Audio Lengkap
   async function loadSurah(targetAyat = null) {
     const surahNumber = surahSelect.value;
     if (!surahNumber) {
@@ -50,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    quranContainer.innerHTML = '<p style="text-align:center;">Memuat ayat...</p>';
+    quranContainer.innerHTML = '<p style="text-align:center;">Memuat ayat dan audio...</p>';
 
     try {
       const response = await fetch(`https://equran.id/api/v2/surat/${surahNumber}`);
@@ -63,12 +61,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const ayatDiv = document.createElement('div');
         ayatDiv.className = 'ayat-card';
         ayatDiv.id = `ayat-${ayat.nomorAyat}`;
+        
+        // Memasang Audio Murottal per ayat
+        const audioUrl = ayat.audio['05'] || ayat.audio['01'];
+
         ayatDiv.innerHTML = `
           <div class="arabic">${ayat.teksArab} <span>(${ayat.nomorAyat})</span></div>
           <div class="translation"><strong>${ayat.nomorAyat}.</strong> ${ayat.teksIndonesia}</div>
-          <audio controls>
-            <source src="${ayat.audio['05']}" type="audio/mp3">
+          
+          <!-- Pemutar Audio Al-Qur'an -->
+          <audio controls preload="none">
+            <source src="${audioUrl}" type="audio/mp3">
+            Browser kamu tidak mendukung pemutar audio.
           </audio>
+          
           <div class="ayat-actions">
             <button class="btn-action" onclick="saveBookmark(${surahNumber}, '${surahName}', ${ayat.nomorAyat})">📌 Tandai</button>
             <button class="btn-action" onclick="copyAyat(\`${ayat.teksArab}\`, \`${ayat.teksIndonesia}\`)">📋 Salin</button>
@@ -108,39 +114,41 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     eventListContainer.innerHTML = '';
-    events.forEach(item => {
+    events.forEach((item, index) => {
       const formattedTime = new Date(item.time).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' });
       const card = document.createElement('div');
       card.className = 'event-card';
       card.innerHTML = `
-        <div class="event-time">⏰ Waktu: ${formattedTime}</div>
+        <div style="font-size: 11px; color: #888;">⏰ Waktu: ${formattedTime}</div>
         <h4 style="margin: 5px 0;">${item.title}</h4>
         <p style="font-size: 13px; margin: 5px 0;">${item.desc}</p>
-        ${item.img ? `<img src="${item.img}" alt="Gambar Event">` : ''}
+        ${item.img ? `<img src="${item.img}" style="max-width:100%; border-radius: 6px; margin-top: 5px;">` : ''}
+        <br>
+        <button onclick="deleteEvent(${index})" style="background:red; color:white; font-size:10px; margin-top:5px; padding:3px 7px;">Hapus Event</button>
       `;
       eventListContainer.appendChild(card);
     });
   }
 
-  // 4. Logika Login Owner (Diperbaiki)
+  // Hapus Event
+  window.deleteEvent = (index) => {
+    const events = JSON.parse(localStorage.getItem('quranEvents') || '[]');
+    events.splice(index, 1);
+    localStorage.setItem('quranEvents', JSON.stringify(events));
+    renderEvents();
+  };
+
+  // 4. Login Owner
   btnAdminAccess.addEventListener('click', (e) => {
-    e.preventDefault(); // Mencegah reload/submit form bawaan
+    e.preventDefault();
 
     const pass = prompt("Masukkan Kata Sandi Pemilik:");
 
-    // Jika menekan Cancel
-    if (pass === null) {
-      return;
-    }
+    if (pass === null) return;
 
-    // Pengecekan password
     if (pass.trim() === OWNER_PASSWORD) {
       alert("Login Berhasil! Membuka Panel Pemilik...");
-      
-      // Sembunyikan modal event info terlebih dahulu
       eventModal.style.display = 'none';
-      
-      // Tampilkan modal admin
       adminModal.style.display = 'block';
     } else {
       alert("Kata sandi salah! Akses ditolak.");
@@ -151,43 +159,32 @@ document.addEventListener('DOMContentLoaded', () => {
     adminModal.style.display = 'none';
   });
 
-  // Simpan Event Baru oleh Owner
-  btnSaveEvent.addEventListener('click', () => {
-    const title = document.getElementById('eventTitle').value;
-    const time = document.getElementById('eventTime').value;
-    const img = document.getElementById('eventImage').value;
-    const desc = document.getElementById('eventDesc').value;
+  // 5. Simpan Event Baru
+  eventForm.addEventListener('submit', (e) => {
+    e.preventDefault();
 
-    if (!title || !time) {
-      alert("Judul dan Waktu event wajib diisi!");
-      return;
-    }
+    const title = document.getElementById('eventTitle').value.trim();
+    const time = document.getElementById('eventTime').value;
+    const img = document.getElementById('eventImage').value.trim();
+    const desc = document.getElementById('eventDesc').value.trim();
 
     const events = JSON.parse(localStorage.getItem('quranEvents') || '[]');
     events.push({ title, time, img, desc });
+    
     localStorage.setItem('quranEvents', JSON.stringify(events));
 
-    // Reset Form & Tutup Modal Admin
-    document.getElementById('eventTitle').value = '';
-    document.getElementById('eventTime').value = '';
-    document.getElementById('eventImage').value = '';
-    document.getElementById('eventDesc').value = '';
-    adminModal.style.display = 'none';
-
     alert("Event berhasil ditambahkan!");
+    eventForm.reset();
+    adminModal.style.display = 'none';
   });
 
-  // 5. Penutupan Modal ketika area luar diklik
+  // 6. Penutupan Modal Area Luar
   window.addEventListener('click', (event) => {
-    if (event.target === eventModal) {
-      eventModal.style.display = 'none';
-    }
-    if (event.target === adminModal) {
-      adminModal.style.display = 'none';
-    }
+    if (event.target === eventModal) eventModal.style.display = 'none';
+    if (event.target === adminModal) adminModal.style.display = 'none';
   });
 
-  // 6. Fitur Bookmark & Salin
+  // 7. Bookmark & Fitur Salin
   window.saveBookmark = (surahNum, surahName, ayatNum) => {
     localStorage.setItem('quranBookmark', JSON.stringify({ surahNum, surahName, ayatNum }));
     alert(`Berhasil menandai Surah ${surahName} ayat ${ayatNum}`);
@@ -199,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (saved) {
       const data = JSON.parse(saved);
       bookmarkInfo.textContent = `${data.surahName} (Ayat ${data.ayatNum})`;
-      bookmarkBox.style.display = 'flex';
+      bookmarkBox.style.display = 'block';
     } else {
       bookmarkBox.style.display = 'none';
     }
@@ -220,23 +217,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  // 7. Pencarian Surah & Mode Gelap
-  function filterSurah() {
+  themeToggleBtn.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+  });
+
+  surahSelect.addEventListener('change', () => loadSurah());
+  
+  searchInput.addEventListener('keyup', () => {
     const filter = searchInput.value.toLowerCase();
     const options = surahSelect.getElementsByTagName('option');
     for (let i = 1; i < options.length; i++) {
       options[i].style.display = options[i].textContent.toLowerCase().includes(filter) ? '' : 'none';
     }
-  }
-
-  themeToggleBtn.addEventListener('click', () => {
-    document.body.classList.toggle('dark-mode');
-    themeToggleBtn.textContent = document.body.classList.contains('dark-mode') ? '☀️ Mode Terang' : '🌙 Mode Gelap';
   });
 
-  surahSelect.addEventListener('change', () => loadSurah());
-  searchInput.addEventListener('keyup', filterSurah);
-
-  // Jalankan fungsi awal
   getSurahList();
 });
