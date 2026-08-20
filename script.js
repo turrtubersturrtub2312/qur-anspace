@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // Element Selectors
   const surahSelect = document.getElementById('surahSelect');
   const quranContainer = document.getElementById('quranContainer');
   const searchInput = document.getElementById('searchInput');
@@ -7,34 +8,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const bookmarkInfo = document.getElementById('bookmarkInfo');
   const btnGoBookmark = document.getElementById('btnGoBookmark');
 
-  // Event Elements Pengunjung
+  // Modal Event Info Elements
   const btnEventInfo = document.getElementById('btnEventInfo');
   const eventModal = document.getElementById('eventModal');
   const closeModal = document.getElementById('closeModal');
   const eventListContainer = document.getElementById('eventListContainer');
-  const ownerArea = document.getElementById('ownerArea');
 
-  // Admin Elements
+  // Modal Admin Elements
   const btnAdminAccess = document.getElementById('btnAdminAccess');
   const adminModal = document.getElementById('adminModal');
   const closeAdminModal = document.getElementById('closeAdminModal');
   const btnSaveEvent = document.getElementById('btnSaveEvent');
 
-  const OWNER_PASSWORD = "sammy8"; // Ganti kata sandi sesuai keinginanmu
+  // Kata Sandi Pemilik
+  const OWNER_PASSWORD = "sammy8";
 
-  // SCRIPT DETEKSI OWNER VIA URL PARAMETER
-  const urlParams = new URLSearchParams(window.location.search);
-  const isOwnerAccess = urlParams.get('admin') === 'true';
-
-  // Jika diakses dengan ?admin=true, simpan identitas owner di laptop ini
-  if (isOwnerAccess) {
-    localStorage.setItem('isQuranOwner', 'true');
-  }
-
-  // Cek apakah browser laptop ini sudah terverifikasi sebagai Laptop Owner
-  const isOwnerDevice = localStorage.getItem('isQuranOwner') === 'true';
-
-  // 1. Ambil daftar surah
+  // 1. Ambil Daftar Surah
   async function getSurahList() {
     try {
       const response = await fetch('https://equran.id/api/v2/surat');
@@ -53,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 2. Ambil isi ayat
+  // 2. Load Ayat Surah
   async function loadSurah(targetAyat = null) {
     const surahNumber = surahSelect.value;
     if (!surahNumber) {
@@ -100,27 +89,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 3. Buka Modal Event Info
-  // Buka Modal Event Info
-btnEventInfo.addEventListener('click', () => {
-  eventModal.style.display = 'block';
-  renderEvents();
-});
+  // 3. Modal Event Info
+  btnEventInfo.addEventListener('click', () => {
+    eventModal.style.display = 'block';
+    renderEvents();
+  });
 
-closeModal.addEventListener('click', () => {
-  eventModal.style.display = 'none';
-});
-
-// Akses Login Owner (Diproteksi Password)
-btnAdminAccess.addEventListener('click', () => {
-  const pass = prompt("Masukkan Kata Sandi Pemilik:");
-  if (pass === OWNER_PASSWORD) {
+  closeModal.addEventListener('click', () => {
     eventModal.style.display = 'none';
-    adminModal.style.display = 'block';
-  } else if (pass !== null) {
-    alert("Kata sandi salah!");
-  }
-});
+  });
 
   function renderEvents() {
     const events = JSON.parse(localStorage.getItem('quranEvents') || '[]');
@@ -145,14 +122,28 @@ btnAdminAccess.addEventListener('click', () => {
     });
   }
 
-  // 4. Akses Login Owner
-  btnAdminAccess.addEventListener('click', () => {
+  // 4. Logika Login Owner (Diperbaiki)
+  btnAdminAccess.addEventListener('click', (e) => {
+    e.preventDefault(); // Mencegah reload/submit form bawaan
+
     const pass = prompt("Masukkan Kata Sandi Pemilik:");
-    if (pass === OWNER_PASSWORD) {
+
+    // Jika menekan Cancel
+    if (pass === null) {
+      return;
+    }
+
+    // Pengecekan password
+    if (pass.trim() === OWNER_PASSWORD) {
+      alert("Login Berhasil! Membuka Panel Pemilik...");
+      
+      // Sembunyikan modal event info terlebih dahulu
       eventModal.style.display = 'none';
+      
+      // Tampilkan modal admin
       adminModal.style.display = 'block';
-    } else if (pass !== null) {
-      alert("Kata sandi salah!");
+    } else {
+      alert("Kata sandi salah! Akses ditolak.");
     }
   });
 
@@ -160,6 +151,7 @@ btnAdminAccess.addEventListener('click', () => {
     adminModal.style.display = 'none';
   });
 
+  // Simpan Event Baru oleh Owner
   btnSaveEvent.addEventListener('click', () => {
     const title = document.getElementById('eventTitle').value;
     const time = document.getElementById('eventTime').value;
@@ -175,6 +167,7 @@ btnAdminAccess.addEventListener('click', () => {
     events.push({ title, time, img, desc });
     localStorage.setItem('quranEvents', JSON.stringify(events));
 
+    // Reset Form & Tutup Modal Admin
     document.getElementById('eventTitle').value = '';
     document.getElementById('eventTime').value = '';
     document.getElementById('eventImage').value = '';
@@ -184,7 +177,17 @@ btnAdminAccess.addEventListener('click', () => {
     alert("Event berhasil ditambahkan!");
   });
 
-  // 5. Fitur Lainnya
+  // 5. Penutupan Modal ketika area luar diklik
+  window.addEventListener('click', (event) => {
+    if (event.target === eventModal) {
+      eventModal.style.display = 'none';
+    }
+    if (event.target === adminModal) {
+      adminModal.style.display = 'none';
+    }
+  });
+
+  // 6. Fitur Bookmark & Salin
   window.saveBookmark = (surahNum, surahName, ayatNum) => {
     localStorage.setItem('quranBookmark', JSON.stringify({ surahNum, surahName, ayatNum }));
     alert(`Berhasil menandai Surah ${surahName} ayat ${ayatNum}`);
@@ -217,6 +220,7 @@ btnAdminAccess.addEventListener('click', () => {
     });
   };
 
+  // 7. Pencarian Surah & Mode Gelap
   function filterSurah() {
     const filter = searchInput.value.toLowerCase();
     const options = surahSelect.getElementsByTagName('option');
@@ -233,5 +237,6 @@ btnAdminAccess.addEventListener('click', () => {
   surahSelect.addEventListener('change', () => loadSurah());
   searchInput.addEventListener('keyup', filterSurah);
 
+  // Jalankan fungsi awal
   getSurahList();
 });
