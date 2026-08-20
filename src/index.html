@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Al-Quran Digital</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Supabase CDN untuk Database Online -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="header-action">
+      <button id="btnEventInfo" class="btn-event">📢 Event - Info</button>
+      <button id="themeToggle">🌙 Mode Gelap</button>
+    </div>
+
+    <h1>Al-Quran Digital</h1>
+
+    <div id="bookmarkBox" class="bookmark-box" style="display: none;">
+      <span>📌 Terakhir Dibaca: <strong id="bookmarkInfo">-</strong></span>
+      <button id="btnGoBookmark">Lanjut Baca</button>
+    </div>
+
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Cari nama surah...">
+    </div>
+
+    <div class="select-box">
+      <label for="surahSelect">Pilih Surah:</label>
+      <select id="surahSelect">
+        <option value="">-- Pilih Surah --</option>
+      </select>
+    </div>
+
+    <div id="quranContainer" class="quran-container"></div>
+  </div>
+
+  <!-- MODAL EVENT INFO -->
+  <div id="eventModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" id="closeModal">&times;</span>
+      <h2>📢 Event & Informasi</h2>
+      
+      <div id="eventListContainer" class="event-list-container"></div>
+
+      <div style="text-align: center; margin-top: 20px;">
+        <button id="btnAdminAccess" class="btn-admin-secret">🔑 Login Owner</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PANEL OWNER -->
+  <div id="adminModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" id="closeAdminModal">&times;</span>
+      <h2>🔒 Panel Pemilik Website</h2>
+      <form id="eventForm">
+        <h3>Tambah Event Baru</h3>
+        <input type="text" id="eventTitle" placeholder="Judul Event / Info" required>
+        <input type="datetime-local" id="eventTime" required>
+        <input type="text" id="eventImage" placeholder="URL Gambar (Opsional)">
+        <textarea id="eventDesc" rows="3" placeholder="Deskripsi atau detail info..."></textarea>
+        <button type="submit" id="btnSaveEvent" class="btn-save">Simpan Event</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
