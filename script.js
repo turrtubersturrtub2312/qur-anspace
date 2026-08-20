@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeAdminModal = document.getElementById('closeAdminModal');
   const btnSaveEvent = document.getElementById('btnSaveEvent');
 
-  const OWNER_PASSWORD = "Sammy8"; // Ganti kata sandi sesuai keinginanmu
+  const OWNER_PASSWORD = "sammy8"; // Ganti kata sandi sesuai keinginanmu
 
   // SCRIPT DETEKSI OWNER VIA URL PARAMETER
   const urlParams = new URLSearchParams(window.location.search);
