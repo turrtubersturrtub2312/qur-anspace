@@ -38,7 +38,7 @@
     <div id="quranContainer" class="quran-container"></div>
   </div>
 
-  <!-- POPUP MODAL EVENT - INFO -->
+  <!-- POPUP MODAL EVENT - INFO UNTUK PENGUNJUNG -->
   <div id="eventModal" class="modal">
     <div class="modal-content">
       <span class="close-btn" id="closeModal">×</span>
@@ -48,14 +48,23 @@
         <!-- Event akan tampil di sini atau pesan kosong -->
       </div>
 
-      <button id="btnAddEvent" class="btn-add-event">+ Tambahkan Event &amp; Info</button>
+      <!-- Tombol Admin Tersembunyi di Dalam Modal Event Info -->
+      <div style="text-align: center; margin-top: 20px;">
+        <button id="btnAdminAccess" class="btn-admin-secret">🔑 Login Owner</button>
+      </div>
+    </div>
+  </div>
 
-      <!-- FORM TAMBAH EVENT (TERSEMBUNYI DAHULU) -->
-      <div id="eventFormContainer" class="event-form" style="display: none;">
+  <!-- POPUP KHUSUS ADMIN (HANYA TERBUKA DENGAN KATA SANDI) -->
+  <div id="adminModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" id="closeAdminModal">×</span>
+      <h2>🔒 Panel Pemilik Website</h2>
+      <div class="event-form">
         <h3>Tambah Event Baru</h3>
         <input type="text" id="eventTitle" placeholder="Judul Event / Info">
         <input type="datetime-local" id="eventTime">
-        <input type="text" id="eventImage" placeholder="URL Gambar (Opsional, contoh: https://link-gambar.com/foto.jpg)">
+        <input type="text" id="eventImage" placeholder="URL Gambar (Opsional)">
         <textarea id="eventDesc" rows="3" placeholder="Deskripsi atau detail info..."></textarea>
         <button id="btnSaveEvent" class="btn-save">Simpan Event</button>
       </div>

@@ -7,16 +7,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const bookmarkInfo = document.getElementById('bookmarkInfo');
   const btnGoBookmark = document.getElementById('btnGoBookmark');
 
-  // Event Elements
+  // Event Elements Pengunjung
   const btnEventInfo = document.getElementById('btnEventInfo');
   const eventModal = document.getElementById('eventModal');
   const closeModal = document.getElementById('closeModal');
   const eventListContainer = document.getElementById('eventListContainer');
-  const btnAddEvent = document.getElementById('btnAddEvent');
-  const eventFormContainer = document.getElementById('eventFormContainer');
+
+  // Admin Elements
+  const btnAdminAccess = document.getElementById('btnAdminAccess');
+  const adminModal = document.getElementById('adminModal');
+  const closeAdminModal = document.getElementById('closeAdminModal');
   const btnSaveEvent = document.getElementById('btnSaveEvent');
 
-  const ADMIN_PASSWORD = "1234"; // Ganti password admin di sini!
+  const OWNER_PASSWORD = "1234"; // Kata sandi pemilik (Ganti sesuai keinginan)
 
   // 1. Ambil daftar surah
   async function getSurahList() {
@@ -84,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 3. FITUR EVENT & INFO
+  // 3. EVENT UNTUK PENGUNJUNG
   btnEventInfo.addEventListener('click', () => {
     eventModal.style.display = 'block';
     renderEvents();
@@ -92,46 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   closeModal.addEventListener('click', () => {
     eventModal.style.display = 'none';
-    eventFormContainer.style.display = 'none';
   });
 
-  // Proteksi Tombol Tambah Event khusus kamu
-  btnAddEvent.addEventListener('click', () => {
-    const pass = prompt("Masukkan kata sandi Admin/Pemilik untuk menambah event:");
-    if (pass === ADMIN_PASSWORD) {
-      eventFormContainer.style.display = 'block';
-    } else if (pass !== null) {
-      alert("Kata sandi salah! Hanya pemilik yang bisa menambah event.");
-    }
-  });
-
-  // Simpan Event
-  btnSaveEvent.addEventListener('click', () => {
-    const title = document.getElementById('eventTitle').value;
-    const time = document.getElementById('eventTime').value;
-    const img = document.getElementById('eventImage').value;
-    const desc = document.getElementById('eventDesc').value;
-
-    if (!title || !time) {
-      alert("Judul dan Waktu event wajib diisi!");
-      return;
-    }
-
-    const events = JSON.parse(localStorage.getItem('quranEvents') || '[]');
-    events.push({ title, time, img, desc });
-    localStorage.setItem('quranEvents', JSON.stringify(events));
-
-    // Reset Form
-    document.getElementById('eventTitle').value = '';
-    document.getElementById('eventTime').value = '';
-    document.getElementById('eventImage').value = '';
-    document.getElementById('eventDesc').value = '';
-    eventFormContainer.style.display = 'none';
-
-    renderEvents();
-  });
-
-  // Render/Tampilkan List Event
   function renderEvents() {
     const events = JSON.parse(localStorage.getItem('quranEvents') || '[]');
     
@@ -155,7 +120,47 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 4. Bookmark & Fitur Lainnya
+  // 4. AKSES KHUSUS PEMILIK (OWNER)
+  btnAdminAccess.addEventListener('click', () => {
+    const pass = prompt("Masukkan Kata Sandi Pemilik:");
+    if (pass === OWNER_PASSWORD) {
+      eventModal.style.display = 'none'; // Tutup modal pengunjung
+      adminModal.style.display = 'block'; // Buka modal admin
+    } else if (pass !== null) {
+      alert("Kata sandi salah!");
+    }
+  });
+
+  closeAdminModal.addEventListener('click', () => {
+    adminModal.style.display = 'none';
+  });
+
+  btnSaveEvent.addEventListener('click', () => {
+    const title = document.getElementById('eventTitle').value;
+    const time = document.getElementById('eventTime').value;
+    const img = document.getElementById('eventImage').value;
+    const desc = document.getElementById('eventDesc').value;
+
+    if (!title || !time) {
+      alert("Judul dan Waktu event wajib diisi!");
+      return;
+    }
+
+    const events = JSON.parse(localStorage.getItem('quranEvents') || '[]');
+    events.push({ title, time, img, desc });
+    localStorage.setItem('quranEvents', JSON.stringify(events));
+
+    // Reset Form & Tutup Modal
+    document.getElementById('eventTitle').value = '';
+    document.getElementById('eventTime').value = '';
+    document.getElementById('eventImage').value = '';
+    document.getElementById('eventDesc').value = '';
+    adminModal.style.display = 'none';
+
+    alert("Event berhasil ditambahkan!");
+  });
+
+  // 5. Bookmark & Utility
   window.saveBookmark = (surahNum, surahName, ayatNum) => {
     localStorage.setItem('quranBookmark', JSON.stringify({ surahNum, surahName, ayatNum }));
     alert(`Berhasil menandai Surah ${surahName} ayat ${ayatNum}`);
